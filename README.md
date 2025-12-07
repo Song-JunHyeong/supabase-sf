@@ -41,18 +41,18 @@ When deploying via Docker Compose on VPS panels, configure domain routing:
 | **Compose Service** | `kong` |
 
 > [!TIP]
-> **Quick access via SSH console:**
+> **Quick access via container console (EasyPanel, Coolify, Portainer):**
+>
+> | Container | Command | Shows |
+> |-----------|---------|-------|
+> | `mcp-guide` | `mcp` | MCP config for Claude Desktop / Cursor |
+> | `env-info` | `show-env` | Environment variables, API keys, login |
+>
+> **Or via SSH on host:**
 >
 > ```bash
-> ./scripts/show-env.sh   # Environment variables, API keys, dashboard login
-> ./scripts/show-mcp.sh   # MCP config for Claude Desktop / Cursor
-> ```
->
-> Or check container logs:
->
-> ```bash
-> docker logs <instance>-env-info   # Environment variables
-> docker logs <instance>-mcp-guide  # MCP config
+> ./scripts/show-env.sh   # Environment variables
+> ./scripts/show-mcp.sh   # MCP config
 > ```
 
 ---

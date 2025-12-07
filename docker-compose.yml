@@ -44,6 +44,10 @@ services:
       - -c
       - |
         apk add --no-cache bash inotify-tools > /dev/null 2>&1
+        # Create 'mcp' command for console access
+        echo '#!/bin/bash' > /usr/local/bin/mcp
+        echo 'bash /app/scripts/show-mcp.sh' >> /usr/local/bin/mcp
+        chmod +x /usr/local/bin/mcp
         bash /app/scripts/mcp-guide.sh
     depends_on:
       init:
@@ -64,6 +68,10 @@ services:
       - -c
       - |
         apk add --no-cache bash inotify-tools > /dev/null 2>&1
+        # Create 'env' command for console access (use 'show-env' to avoid conflict with system 'env')
+        echo '#!/bin/bash' > /usr/local/bin/show-env
+        echo 'bash /app/scripts/show-env.sh' >> /usr/local/bin/show-env
+        chmod +x /usr/local/bin/show-env
         bash /app/scripts/env-info.sh
     depends_on:
       init:
