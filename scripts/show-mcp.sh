@@ -30,7 +30,7 @@ printf "========================================================================
 printf "              SUPABASE MCP CONNECTION GUIDE (Self-Hosted)\n"
 printf "================================================================================\n"
 printf "\n"
-printf "Package: @jun-b/supabase-mcp-sf\n"
+printf "Package: @jun-b/supabase-mcp-sf@latest\n"
 printf "\n"
 printf "--------------------------------------------------------------------------------\n"
 printf "MCP CONFIGURATION TEMPLATE\n"
@@ -43,7 +43,7 @@ cat << 'EOF'
   "mcpServers": {
     "supabase-sf": {
       "command": "npx",
-      "args": ["-y", "@jun-b/supabase-mcp-sf"],
+      "args": ["-y", "@jun-b/supabase-mcp-sf@latest"],
       "env": {
         "SUPABASE_URL": "<SUPABASE_URL>",
         "SUPABASE_SERVICE_ROLE_KEY": "<SERVICE_ROLE_KEY>",

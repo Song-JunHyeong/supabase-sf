@@ -180,7 +180,7 @@ Add to your MCP configuration file:
   "mcpServers": {
     "supabase-sf": {
       "command": "npx",
-      "args": ["-y", "@jun-b/supabase-mcp-sf"],
+      "args": ["-y", "@jun-b/supabase-mcp-sf@latest"],
       "env": {
         "SUPABASE_URL": "http://your-domain:8000",
         "SUPABASE_SERVICE_ROLE_KEY": "<your-service-role-key>",
