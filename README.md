@@ -10,20 +10,20 @@ Docker Compose setup for deploying the complete Supabase stack on your local mac
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/supabase/supabase.git
-cd supabase/docker
+git clone https://github.com/your-org/supabase-sf.git
+cd supabase-sf
 
-# 2. Set up environment variables
-cp .env.example .env
+# 2. Initialize (auto-generates secure secrets)
+./scripts/init-instance.sh
 
-# 3. Edit .env file to change required values (read "⚠️ Immutable Secrets" section first!)
-
-# 4. Start
-docker compose up -d
+# Or manually:
+# cp .env.example .env
+# (edit .env, then:)
+# docker compose up -d
 ```
 
 **Access**:
-- **Studio Dashboard**: http://localhost:8000 (default: `supabase` / `this_password_is_insecure_and_should_be_updated`)
+- **Studio Dashboard**: http://localhost:8000
 - **API**: http://localhost:8000
 
 ---
@@ -136,7 +136,7 @@ docker exec supabase-db pg_dumpall -U postgres > backup.sql
 
 ```bash
 # Delete all data and restart
-./reset.sh
+./scripts/reset.sh
 ```
 
 ---
