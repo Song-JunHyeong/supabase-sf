@@ -32,7 +32,7 @@ print_connection_info() {
     local SUPABASE_URL=$(get_env_value "SUPABASE_PUBLIC_URL")
     local SERVICE_ROLE_KEY=$(get_env_value "SERVICE_ROLE_KEY")
     local ANON_KEY=$(get_env_value "ANON_KEY")
-    SUPABASE_URL="${SUPABASE_URL:-http://localhost}"
+    SUPABASE_URL="${SUPABASE_URL:-<URL>}"
 
     printf "\n"
     printf "================================================================================\n"

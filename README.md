@@ -182,7 +182,7 @@ Add to your MCP configuration file:
       "command": "npx",
       "args": ["-y", "@jun-b/supabase-mcp-sf@latest"],
       "env": {
-        "SUPABASE_URL": "http://your-domain:8000",
+        "SUPABASE_URL": <URL>,
         "SUPABASE_SERVICE_ROLE_KEY": "<your-service-role-key>",
         "SUPABASE_ANON_KEY": "<your-anon-key>"
       }
