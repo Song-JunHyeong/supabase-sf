@@ -74,10 +74,7 @@ main() {
     
     # Check if already initialized
     if [[ -f "$INIT_MARKER" ]]; then
-        log_info "Already initialized."
-        # Still print env info for deploy terminal
-        print_env_info
-        print_mcp_guide
+        log_info "Already initialized. Skipping..."
         exit 0
     fi
     
@@ -186,114 +183,11 @@ main() {
     
     if $updated; then
         log_info "Initialization complete!"
+        log_info "View credentials: ./scripts/show-env.sh"
+        log_info "View MCP config: ./scripts/show-mcp.sh"
     else
         log_info "All secrets already configured."
     fi
-    
-    # Always print env info for easy copy from deploy terminal
-    print_env_info
-    print_mcp_guide
-}
-
-# Print env info for deploy terminal (copyable format)
-print_env_info() {
-    local INSTANCE_NAME=$(get_env_value "INSTANCE_NAME")
-    local STUDIO_ORG=$(get_env_value "STUDIO_DEFAULT_ORGANIZATION")
-    local STUDIO_PROJECT=$(get_env_value "STUDIO_DEFAULT_PROJECT")
-    local DASHBOARD_USER=$(get_env_value "DASHBOARD_USERNAME")
-    local DASHBOARD_PASS=$(get_env_value "DASHBOARD_PASSWORD")
-    local SUPABASE_URL=$(get_env_value "SUPABASE_PUBLIC_URL")
-    local SITE_URL=$(get_env_value "SITE_URL")
-    local API_URL=$(get_env_value "API_EXTERNAL_URL")
-    local KONG_HTTP=$(get_env_value "KONG_HTTP_PORT")
-    local KONG_HTTPS=$(get_env_value "KONG_HTTPS_PORT")
-    local ANON_KEY=$(get_env_value "ANON_KEY")
-    local SERVICE_KEY=$(get_env_value "SERVICE_ROLE_KEY")
-
-    echo ""
-    echo "================================================================================"
-    echo "                    SUPABASE ENVIRONMENT INFO"
-    echo "================================================================================"
-    echo ""
-    echo "Instance: ${INSTANCE_NAME:-supabase}"
-    echo "Generated at: $(date '+%Y-%m-%d %H:%M:%S')"
-    echo ""
-    echo "--------------------------------------------------------------------------------"
-    echo "DASHBOARD LOGIN"
-    echo "--------------------------------------------------------------------------------"
-    echo ""
-    echo "  URL:      ${SUPABASE_URL:-http://localhost:8000}"
-    echo "  Username: ${DASHBOARD_USER:-supabase}"
-    echo "  Password: ${DASHBOARD_PASS}"
-    echo ""
-    echo "--------------------------------------------------------------------------------"
-    echo "PROJECT INFO"
-    echo "--------------------------------------------------------------------------------"
-    echo ""
-    echo "  Organization: ${STUDIO_ORG:-Default Organization}"
-    echo "  Project:      ${STUDIO_PROJECT:-Default Project}"
-    echo ""
-    echo "--------------------------------------------------------------------------------"
-    echo "URLS"
-    echo "--------------------------------------------------------------------------------"
-    echo ""
-    echo "  SUPABASE_PUBLIC_URL: ${SUPABASE_URL:-http://localhost:8000}"
-    echo "  SITE_URL:            ${SITE_URL:-http://localhost:3000}"
-    echo "  API_EXTERNAL_URL:    ${API_URL:-http://localhost:8000}"
-    echo "  KONG_HTTP_PORT:      ${KONG_HTTP:-8000}"
-    echo "  KONG_HTTPS_PORT:     ${KONG_HTTPS:-8443}"
-    echo ""
-    echo "--------------------------------------------------------------------------------"
-    echo "API KEYS (copy these for your app)"
-    echo "--------------------------------------------------------------------------------"
-    echo ""
-    echo "ANON_KEY:"
-    echo "${ANON_KEY}"
-    echo ""
-    echo "SERVICE_ROLE_KEY:"
-    echo "${SERVICE_KEY}"
-    echo ""
-    echo "================================================================================"
-    echo ""
-}
-
-# Print MCP connection guide for deploy terminal
-print_mcp_guide() {
-    local SUPABASE_URL=$(get_env_value "SUPABASE_PUBLIC_URL")
-    local SERVICE_ROLE_KEY=$(get_env_value "SERVICE_ROLE_KEY")
-    local ANON_KEY=$(get_env_value "ANON_KEY")
-    
-    SUPABASE_URL="${SUPABASE_URL:-http://localhost:8000}"
-
-    echo ""
-    echo "================================================================================"
-    echo "                    SUPABASE MCP CONNECTION GUIDE"
-    echo "================================================================================"
-    echo ""
-    echo "{"
-    echo "  \"mcpServers\": {"
-    echo "    \"supabase\": {"
-    echo "      \"command\": \"npx\","
-    echo "      \"args\": ["
-    echo "        \"-y\","
-    echo "        \"@supabase/mcp-server-supabase@latest\","
-    echo "        \"--supabase-url\", \"${SUPABASE_URL}\","
-    echo "        \"--supabase-key\", \"${SERVICE_ROLE_KEY}\""
-    echo "      ]"
-    echo "    }"
-    echo "  }"
-    echo "}"
-    echo ""
-    echo "--------------------------------------------------------------------------------"
-    echo ""
-    echo "SUPABASE_URL=${SUPABASE_URL}"
-    echo "SUPABASE_ANON_KEY=${ANON_KEY}"
-    echo "SUPABASE_SERVICE_ROLE_KEY=${SERVICE_ROLE_KEY}"
-    echo ""
-    echo "WARNING: Keep SERVICE_ROLE_KEY secret! It bypasses Row Level Security."
-    echo ""
-    echo "================================================================================"
-    echo ""
 }
 
 main "$@"

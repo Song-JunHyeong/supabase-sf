@@ -41,12 +41,12 @@ When deploying via Docker Compose on VPS panels, configure domain routing:
 | **Compose Service** | `kong` |
 
 > [!TIP]
-> **View directly in deploy terminal:**
+> **Quick access via SSH console:**
 >
-> - Environment variables (URLs, API keys, dashboard credentials)
-> - MCP connection config (for Claude Desktop / Cursor)
->
-> Auto-printed at the end of deployment logs. Copy-paste ready!
+> ```bash
+> ./scripts/show-env.sh   # Environment variables, API keys, dashboard login
+> ./scripts/show-mcp.sh   # MCP config for Claude Desktop / Cursor
+> ```
 >
 > Or check container logs:
 >
@@ -131,6 +131,8 @@ All rotation scripts support `--dry-run` (preview) and `--allow-destructive` (ex
 
 | Script                          | Purpose            | Impact                             |
 | ------------------------------- | ------------------ | ---------------------------------- |
+| `show-env.sh`                 | Show env info      | Read-only (URLs, API keys, login)  |
+| `show-mcp.sh`                 | Show MCP config    | Read-only (Claude/Cursor setup)    |
 | `init-instance.sh`            | First-time setup   | Generates secrets                  |
 | `check-health.sh`             | Verify services    | Read-only                          |
 | `backup.sh`                   | Database backup    | Creates SQL dump                   |
