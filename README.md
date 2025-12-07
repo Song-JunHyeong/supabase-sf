@@ -83,6 +83,36 @@ Supporting Services:
 
 ---
 
+## Repository Structure
+
+```
+supabase-sf/
+├── docker-compose.yml   # Main orchestration file
+├── .env.example         # Environment template (copy to .env)
+├── scripts/             # Operational scripts
+│   ├── init-instance.sh     # First-time setup (auto-generates secrets)
+│   ├── rotate-*.sh          # Key rotation scripts
+│   ├── check-health.sh      # Health check & secret sync validation
+│   └── reset.sh             # Full reset
+├── volumes/             # Docker volumes for data persistence
+│   ├── db/              # PostgreSQL init scripts & data
+│   ├── storage/         # File storage
+│   └── functions/       # Edge Functions
+├── supabase/            # Supabase CLI local development config
+│   ├── config.toml      # CLI configuration
+│   ├── migrations/      # User-defined DB migrations
+│   ├── functions/       # User-defined Edge Functions
+│   └── seed.sql         # Initial seed data
+└── docs/                # Documentation
+```
+
+> [!NOTE]
+> **`volumes/` vs `supabase/` 차이점**:
+> - `volumes/db/`: Docker self-host 배포 시 DB 초기화에 사용되는 시스템 SQL 파일들
+> - `supabase/`: Supabase CLI 로컬 개발용 설정 (config.toml, 사용자 마이그레이션 등)
+
+---
+
 ## Configuration
 
 Key environment variables (`.env`):
