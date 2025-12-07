@@ -24,8 +24,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
-ENV_FILE="$PROJECT_ROOT/.env"
+source "$SCRIPT_DIR/common.sh"
 
 # Mode flags
 DRY_RUN=false
@@ -182,11 +181,12 @@ main() {
     # Update all DB roles
     log_info "Updating database roles..."
     
-    docker exec supabase-db psql -U postgres -c "ALTER USER authenticator WITH PASSWORD '$NEW_PASSWORD';"
-    docker exec supabase-db psql -U postgres -c "ALTER USER pgbouncer WITH PASSWORD '$NEW_PASSWORD';"
-    docker exec supabase-db psql -U postgres -c "ALTER USER supabase_auth_admin WITH PASSWORD '$NEW_PASSWORD';"
-    docker exec supabase-db psql -U postgres -c "ALTER USER supabase_functions_admin WITH PASSWORD '$NEW_PASSWORD';"
-    docker exec supabase-db psql -U postgres -c "ALTER USER supabase_storage_admin WITH PASSWORD '$NEW_PASSWORD';"
+    local db_container="$(get_instance_name)-db"
+    docker exec "$db_container" psql -U postgres -c "ALTER USER authenticator WITH PASSWORD '$NEW_PASSWORD';"
+    docker exec "$db_container" psql -U postgres -c "ALTER USER pgbouncer WITH PASSWORD '$NEW_PASSWORD';"
+    docker exec "$db_container" psql -U postgres -c "ALTER USER supabase_auth_admin WITH PASSWORD '$NEW_PASSWORD';"
+    docker exec "$db_container" psql -U postgres -c "ALTER USER supabase_functions_admin WITH PASSWORD '$NEW_PASSWORD';"
+    docker exec "$db_container" psql -U postgres -c "ALTER USER supabase_storage_admin WITH PASSWORD '$NEW_PASSWORD';"
     
     log_info "Database roles updated"
     

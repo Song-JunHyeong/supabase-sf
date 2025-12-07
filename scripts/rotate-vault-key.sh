@@ -25,8 +25,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
-ENV_FILE="$PROJECT_ROOT/.env"
+source "$SCRIPT_DIR/common.sh"
 
 # Mode flags
 DRY_RUN=false
@@ -234,7 +233,8 @@ main() {
     sleep 10
     
     log_info "Clearing Supavisor data (DESTRUCTIVE)..."
-    docker exec supabase-db psql -U postgres -d _supabase -c "TRUNCATE TABLE supavisor.tenants CASCADE;" 2>/dev/null || true
+    local db_container="$(get_instance_name)-db"
+    docker exec "$db_container" psql -U postgres -d _supabase -c "TRUNCATE TABLE supavisor.tenants CASCADE;" 2>/dev/null || true
     
     # Update .env
     sed -i "s|^VAULT_ENC_KEY=.*|VAULT_ENC_KEY=$NEW_KEY|" "$ENV_FILE"

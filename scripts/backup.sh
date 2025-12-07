@@ -17,7 +17,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+source "$SCRIPT_DIR/common.sh"
 
 # Colors
 RED='\033[0;31m'
@@ -43,8 +43,9 @@ main() {
     echo ""
     
     # Check if DB is running
-    if ! docker inspect supabase-db >/dev/null 2>&1; then
-        log_error "supabase-db container is not running"
+    local db_container="$(get_instance_name)-db"
+    if ! docker inspect "$db_container" >/dev/null 2>&1; then
+        log_error "$db_container container is not running"
         exit 1
     fi
     
@@ -55,7 +56,7 @@ main() {
     log_info "Creating backup..."
     log_info "Target: $BACKUP_FILE"
     
-    if docker exec supabase-db pg_dumpall -U postgres > "$BACKUP_FILE" 2>/dev/null; then
+    if docker exec "$db_container" pg_dumpall -U postgres > "$BACKUP_FILE" 2>/dev/null; then
         # Get file size
         local SIZE=$(du -h "$BACKUP_FILE" | cut -f1)
         

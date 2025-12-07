@@ -24,8 +24,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
-ENV_FILE="$PROJECT_ROOT/.env"
+source "$SCRIPT_DIR/common.sh"
 
 # Mode flags
 DRY_RUN=false
@@ -220,7 +219,8 @@ main() {
     
     # Update DB setting
     log_info "Updating database setting..."
-    docker exec supabase-db psql -U postgres -c \
+    local db_container="$(get_instance_name)-db"
+    docker exec "$db_container" psql -U postgres -c \
         "ALTER DATABASE postgres SET \"app.settings.jwt_secret\" TO '$NEW_SECRET';"
     
     log_info "Database setting updated"

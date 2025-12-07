@@ -14,8 +14,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
-ENV_FILE="$PROJECT_ROOT/.env"
+source "$SCRIPT_DIR/common.sh"
 
 # Colors
 RED='\033[0;31m'
@@ -44,7 +43,8 @@ check_container() {
     local optional="${2:-false}"
     
     # In CI, treat pooler as optional (known initialization timing issue)
-    if [[ "$name" == "supabase-pooler" ]] && [[ "${CI:-}" == "true" || "${GITHUB_ACTIONS:-}" == "true" ]]; then
+    local pooler_name="$(get_instance_name)-pooler"
+    if [[ "$name" == "$pooler_name" ]] && [[ "${CI:-}" == "true" || "${GITHUB_ACTIONS:-}" == "true" ]]; then
         optional="true"
     fi
     
@@ -127,7 +127,8 @@ check_secret_sync() {
     local JWT_SECRET=$(get_env_value "JWT_SECRET")
     
     # Check JWT_SECRET matches DB
-    local db_jwt=$(docker exec supabase-db psql -U postgres -t -c \
+    local db_container="$(get_instance_name)-db"
+    local db_jwt=$(docker exec "$db_container" psql -U postgres -t -c \
         "SHOW \"app.settings.jwt_secret\";" 2>/dev/null | tr -d ' \n' || echo "")
     
     if [[ -z "$db_jwt" ]]; then
@@ -142,7 +143,7 @@ check_secret_sync() {
     fi
     
     # Check POSTGRES_PASSWORD by attempting connection
-    if docker exec supabase-db psql -U authenticator -h localhost -c "SELECT 1;" >/dev/null 2>&1; then
+    if docker exec "$db_container" psql -U authenticator -h localhost -c "SELECT 1;" >/dev/null 2>&1; then
         log_ok "POSTGRES_PASSWORD: authenticator role can connect"
     else
         log_warn "POSTGRES_PASSWORD: could not verify (role may not have login)"
@@ -160,24 +161,26 @@ main() {
     echo "═══════════════════════════════════════════════════════════════"
     echo ""
     
-    echo "[CONTAINERS] Core Services"
+    local instance=$(get_instance_name)
+    
+    echo "[CONTAINERS] Core Services (instance: $instance)"
     echo "───────────────────────────────────────────────────────────────"
-    check_container "supabase-db"
-    check_container "supabase-kong"
-    check_container "supabase-auth"
-    check_container "supabase-rest"
-    check_container "realtime-dev.supabase-realtime"
-    check_container "supabase-storage"
-    check_container "supabase-meta"
-    check_container "supabase-edge-functions"
-    check_container "supabase-pooler"
-    check_container "supabase-studio"
+    check_container "${instance}-db"
+    check_container "${instance}-kong"
+    check_container "${instance}-auth"
+    check_container "${instance}-rest"
+    check_container "realtime-dev.${instance}-realtime"
+    check_container "${instance}-storage"
+    check_container "${instance}-meta"
+    check_container "${instance}-edge-functions"
+    check_container "${instance}-pooler"
+    check_container "${instance}-studio"
     
     echo ""
     echo "[CONTAINERS] Optional Services (profile: full)"
     echo "───────────────────────────────────────────────────────────────"
-    check_container "supabase-analytics" "true"
-    check_container "supabase-imgproxy" "true"
+    check_container "${instance}-analytics" "true"
+    check_container "${instance}-imgproxy" "true"
     check_container "supabase-vector" "true"
     
     echo ""
