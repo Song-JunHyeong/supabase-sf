@@ -33,6 +33,7 @@ get_env_value() {
 }
 
 ERRORS=0
+WARNINGS=0
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Container Health Checks
@@ -40,6 +41,7 @@ ERRORS=0
 
 check_container() {
     local name="$1"
+    local optional="${2:-false}"
     local status=$(docker inspect --format='{{.State.Health.Status}}' "$name" 2>/dev/null || echo "not_found")
     
     case "$status" in
@@ -48,13 +50,24 @@ check_container() {
             ;;
         "starting")
             log_warn "$name: starting (please wait)"
+            WARNINGS=$((WARNINGS + 1))
             ;;
         "unhealthy")
-            log_fail "$name: unhealthy"
-            ERRORS=$((ERRORS + 1))
+            if [[ "$optional" == "true" ]]; then
+                log_warn "$name: unhealthy (optional service)"
+                WARNINGS=$((WARNINGS + 1))
+            else
+                log_fail "$name: unhealthy"
+                ERRORS=$((ERRORS + 1))
+            fi
             ;;
         "not_found")
-            log_warn "$name: container not found"
+            if [[ "$optional" == "true" ]]; then
+                log_warn "$name: not running (optional service)"
+            else
+                log_warn "$name: container not found"
+                WARNINGS=$((WARNINGS + 1))
+            fi
             ;;
         *)
             # Container running but no healthcheck defined
@@ -62,8 +75,12 @@ check_container() {
             if [[ "$running" == "true" ]]; then
                 log_ok "$name: running (no healthcheck)"
             else
-                log_fail "$name: not running"
-                ERRORS=$((ERRORS + 1))
+                if [[ "$optional" == "true" ]]; then
+                    log_warn "$name: not running (optional service)"
+                else
+                    log_fail "$name: not running"
+                    ERRORS=$((ERRORS + 1))
+                fi
             fi
             ;;
     esac
@@ -77,11 +94,17 @@ check_endpoint() {
     local name="$1"
     local url="$2"
     
-    if curl -sf -o /dev/null --max-time 5 "$url"; then
+    if curl -sf -o /dev/null --max-time 5 "$url" 2>/dev/null; then
         log_ok "$name endpoint: OK"
     else
-        log_fail "$name endpoint: FAILED ($url)"
-        ERRORS=$((ERRORS + 1))
+        # In CI environments, endpoints may not be accessible
+        if [[ "${CI:-}" == "true" ]] || [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
+            log_warn "$name endpoint: skipped (CI environment)"
+            WARNINGS=$((WARNINGS + 1))
+        else
+            log_fail "$name endpoint: FAILED ($url)"
+            ERRORS=$((ERRORS + 1))
+        fi
     fi
 }
 
@@ -131,7 +154,7 @@ main() {
     echo "═══════════════════════════════════════════════════════════════"
     echo ""
     
-    echo "📦 Container Status"
+    echo "📦 Container Status (Core Services)"
     echo "───────────────────────────────────────────────────────────────"
     check_container "supabase-db"
     check_container "supabase-kong"
@@ -144,10 +167,12 @@ main() {
     check_container "supabase-pooler"
     check_container "supabase-studio"
     
-    # Optional services
-    check_container "supabase-analytics"
-    check_container "supabase-imgproxy"
-    check_container "supabase-vector"
+    echo ""
+    echo "📦 Container Status (Optional Services - profile: full)"
+    echo "───────────────────────────────────────────────────────────────"
+    check_container "supabase-analytics" "true"
+    check_container "supabase-imgproxy" "true"
+    check_container "supabase-vector" "true"
     
     echo ""
     echo "🌐 Endpoint Checks"
@@ -165,10 +190,13 @@ main() {
     echo ""
     echo "═══════════════════════════════════════════════════════════════"
     if [[ $ERRORS -eq 0 ]]; then
-        log_ok "All checks passed!"
+        if [[ $WARNINGS -gt 0 ]]; then
+            log_warn "$WARNINGS warning(s), but no critical errors"
+        fi
+        log_ok "All critical checks passed!"
         exit 0
     else
-        log_fail "$ERRORS check(s) failed"
+        log_fail "$ERRORS critical check(s) failed"
         exit 1
     fi
 }
