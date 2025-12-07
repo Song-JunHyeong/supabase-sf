@@ -155,6 +155,78 @@ All rotation scripts support `--dry-run` (preview) and `--allow-destructive` (ex
 
 ---
 
+## MCP Integration (AI Assistant)
+
+Connect your self-hosted Supabase to AI assistants (Claude, Cursor, etc.) using [supabase-mcp-sf](https://github.com/Song-JunHyeong/supabase-mcp-sf).
+
+### Quick Setup
+
+```bash
+# Get your connection info
+./scripts/show-mcp.sh
+```
+
+This outputs a ready-to-use configuration for your MCP client.
+
+### Claude Desktop / Cursor Configuration
+
+Add to your MCP configuration file:
+
+**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`  
+**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "supabase-sf": {
+      "command": "npx",
+      "args": ["-y", "@jun-b/supabase-mcp-sf"],
+      "env": {
+        "SUPABASE_URL": "http://your-domain:8000",
+        "SUPABASE_SERVICE_ROLE_KEY": "<your-service-role-key>",
+        "SUPABASE_ANON_KEY": "<your-anon-key>"
+      }
+    }
+  }
+}
+```
+
+> [!TIP]
+> Run `./scripts/show-mcp.sh` or check `docker logs supabase-mcp-guide` for pre-filled configuration.
+
+### Available AI Tools
+
+With MCP connected, your AI assistant can:
+
+| Category | Tools |
+|----------|-------|
+| **Database** | `execute_sql`, `list_tables`, `apply_migration` |
+| **Auth** | `list_users`, `create_user`, `generate_link` |
+| **Storage** | `list_files`, `upload_file`, `create_signed_url` |
+| **Functions** | `list_edge_functions`, `invoke_edge_function` |
+| **Operations** | `check_health`, `backup_now`, `rotate_secret`, `get_stats` |
+| **Docs** | `search_docs` |
+
+### Example AI Prompts
+
+```
+"Show me all tables in my database"
+"Create a new user with email test@example.com"
+"Check the health of my Supabase instance"
+"Create a database backup"
+"List all Edge Functions"
+```
+
+### Security
+
+> [!WARNING]
+> The `SERVICE_ROLE_KEY` has full database access. 
+> - Never expose MCP server to the internet
+> - Use `--read-only` mode for safer AI interactions
+> - Consider creating a dedicated AI agent role (see MCP docs)
+
+---
+
 ## Repository Structure
 
 ```
