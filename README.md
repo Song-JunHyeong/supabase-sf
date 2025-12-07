@@ -113,6 +113,39 @@ supabase-sf/
 
 ---
 
+## Scripts Workflow
+
+| Script | Purpose | Downtime | Side Effects |
+|--------|---------|----------|--------------|
+| `./scripts/init-instance.sh` | First-time setup | None | Generates all secrets, starts containers |
+| `./scripts/check-health.sh` | Health check | None | Read-only, validates services & secrets |
+| `./scripts/backup.sh` | Database backup | None | Creates SQL dump in `backups/` |
+| `./scripts/reset.sh` | Full reset | **Full** | ⚠️ Deletes ALL data, requires re-init |
+| `./scripts/rotate-postgres-password.sh` | Rotate DB password | ~30s | Restarts DB-connected services |
+| `./scripts/rotate-jwt-secret.sh` | Rotate JWT secret | ~1min | ⚠️ **All user sessions invalidated** |
+| `./scripts/rotate-vault-key.sh` | Rotate Vault key | ~1min | ⚠️ **Pooler data reset** |
+
+**Recommended workflow:**
+```bash
+# 1. Install
+./scripts/init-instance.sh
+
+# 2. Verify
+./scripts/check-health.sh
+
+# 3. Regular backups
+./scripts/backup.sh
+
+# 4. Key rotation (when needed)
+./scripts/rotate-postgres-password.sh  # Safe, minimal downtime
+./scripts/rotate-jwt-secret.sh         # Users must re-login
+./scripts/rotate-vault-key.sh          # Pooler reconfigured
+```
+
+For detailed key rotation procedures, see [docs/KEY_ROTATION.md](./docs/KEY_ROTATION.md).
+
+---
+
 ## Configuration
 
 Key environment variables (`.env`):
