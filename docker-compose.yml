@@ -27,8 +27,7 @@ services:
       - -c
       - |
         apk add --no-cache bash openssl > /dev/null 2>&1
-        chmod +x /app/scripts/auto-init.sh 2>/dev/null || true
-        /app/scripts/auto-init.sh
+        bash /app/scripts/auto-init.sh
     restart: "no"
 
   # ─────────────────────────────────────────────────────────────────────────────
@@ -45,8 +44,27 @@ services:
       - -c
       - |
         apk add --no-cache bash > /dev/null 2>&1
-        chmod +x /app/scripts/mcp-guide.sh 2>/dev/null || true
-        /app/scripts/mcp-guide.sh
+        bash /app/scripts/mcp-guide.sh
+    depends_on:
+      init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Environment Info (view with: docker logs <instance>-env-info)
+  # ─────────────────────────────────────────────────────────────────────────────
+  env-info:
+    container_name: ${INSTANCE_NAME:-supabase}-env-info
+    image: alpine:3.19
+    volumes:
+      - .:/app:ro,z
+    working_dir: /app
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        apk add --no-cache bash > /dev/null 2>&1
+        bash /app/scripts/env-info.sh
     depends_on:
       init:
         condition: service_completed_successfully
