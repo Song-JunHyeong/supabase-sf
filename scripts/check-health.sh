@@ -27,6 +27,11 @@ log_ok() { echo -e "${GREEN}✅${NC} $1"; }
 log_warn() { echo -e "${YELLOW}⚠️${NC} $1"; }
 log_fail() { echo -e "${RED}❌${NC} $1"; }
 
+get_env_value() {
+    local key="$1"
+    grep "^${key}=" "$ENV_FILE" 2>/dev/null | cut -d'=' -f2- | head -1 || echo ""
+}
+
 ERRORS=0
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -90,7 +95,7 @@ check_secret_sync() {
         return
     fi
     
-    source "$ENV_FILE"
+    local JWT_SECRET=$(get_env_value "JWT_SECRET")
     
     # Check JWT_SECRET matches DB
     local db_jwt=$(docker exec supabase-db psql -U postgres -t -c \

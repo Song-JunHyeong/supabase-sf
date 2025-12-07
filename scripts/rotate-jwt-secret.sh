@@ -56,6 +56,11 @@ generate_jwt_token() {
     echo "${header_base64}.${payload_base64}.${signature}"
 }
 
+get_env_value() {
+    local key="$1"
+    grep "^${key}=" "$ENV_FILE" 2>/dev/null | cut -d'=' -f2- | head -1 || echo ""
+}
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Main
 # ─────────────────────────────────────────────────────────────────────────────
@@ -79,11 +84,9 @@ main() {
         log_error ".env file not found"
         exit 1
     fi
-    source "$ENV_FILE"
-    
     # Get new secret
     local NEW_SECRET="${1:-$(generate_secret)}"
-    local OLD_SECRET="$JWT_SECRET"
+    local OLD_SECRET=$(get_env_value "JWT_SECRET")
     
     log_info "Current secret: ${OLD_SECRET:0:8}..."
     log_info "New secret: ${NEW_SECRET:0:8}..."

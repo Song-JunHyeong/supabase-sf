@@ -36,6 +36,11 @@ generate_password() {
     openssl rand -base64 32 | tr -d '/+=' | head -c 32
 }
 
+get_env_value() {
+    local key="$1"
+    grep "^${key}=" "$ENV_FILE" 2>/dev/null | cut -d'=' -f2- | head -1 || echo ""
+}
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Main
 # ─────────────────────────────────────────────────────────────────────────────
@@ -49,11 +54,9 @@ main() {
         log_error ".env file not found"
         exit 1
     fi
-    source "$ENV_FILE"
-    
     # Get new password
     local NEW_PASSWORD="${1:-$(generate_password)}"
-    local OLD_PASSWORD="$POSTGRES_PASSWORD"
+    local OLD_PASSWORD=$(get_env_value "POSTGRES_PASSWORD")
     
     log_info "Current password: ${OLD_PASSWORD:0:4}...${OLD_PASSWORD: -4}"
     log_info "New password: ${NEW_PASSWORD:0:4}...${NEW_PASSWORD: -4}"

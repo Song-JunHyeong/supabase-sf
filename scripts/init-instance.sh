@@ -30,6 +30,15 @@ log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Read a value from .env file safely (handles spaces)
+# ─────────────────────────────────────────────────────────────────────────────
+
+get_env_value() {
+    local key="$1"
+    grep "^${key}=" "$ENV_FILE" 2>/dev/null | cut -d'=' -f2- | head -1 || echo ""
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Generate random strings
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -96,13 +105,12 @@ main() {
         fi
     fi
     
-    # Read current values
-    source "$ENV_FILE"
-    
     local updated=false
+    local jwt_updated=false
     
     # Generate POSTGRES_PASSWORD if placeholder
-    if is_placeholder "${POSTGRES_PASSWORD:-}"; then
+    local current_pg_pass=$(get_env_value "POSTGRES_PASSWORD")
+    if is_placeholder "$current_pg_pass"; then
         local new_pass=$(generate_password)
         sed -i "s|^POSTGRES_PASSWORD=.*|POSTGRES_PASSWORD=$new_pass|" "$ENV_FILE"
         log_info "Generated new POSTGRES_PASSWORD"
@@ -110,8 +118,8 @@ main() {
     fi
     
     # Generate JWT_SECRET if placeholder
-    local jwt_updated=false
-    if is_placeholder "${JWT_SECRET:-}"; then
+    local current_jwt=$(get_env_value "JWT_SECRET")
+    if is_placeholder "$current_jwt"; then
         local new_jwt=$(generate_secret)
         sed -i "s|^JWT_SECRET=.*|JWT_SECRET=$new_jwt|" "$ENV_FILE"
         log_info "Generated new JWT_SECRET"
@@ -120,7 +128,8 @@ main() {
     fi
     
     # Generate VAULT_ENC_KEY if placeholder
-    if is_placeholder "${VAULT_ENC_KEY:-}"; then
+    local current_vault=$(get_env_value "VAULT_ENC_KEY")
+    if is_placeholder "$current_vault"; then
         local new_vault=$(generate_password)
         sed -i "s|^VAULT_ENC_KEY=.*|VAULT_ENC_KEY=$new_vault|" "$ENV_FILE"
         log_info "Generated new VAULT_ENC_KEY"
@@ -128,7 +137,8 @@ main() {
     fi
     
     # Generate PG_META_CRYPTO_KEY if placeholder
-    if is_placeholder "${PG_META_CRYPTO_KEY:-}"; then
+    local current_meta=$(get_env_value "PG_META_CRYPTO_KEY")
+    if is_placeholder "$current_meta"; then
         local new_meta=$(generate_password)
         sed -i "s|^PG_META_CRYPTO_KEY=.*|PG_META_CRYPTO_KEY=$new_meta|" "$ENV_FILE"
         log_info "Generated new PG_META_CRYPTO_KEY"
@@ -136,7 +146,8 @@ main() {
     fi
     
     # Generate SECRET_KEY_BASE if contains default value
-    if [[ "${SECRET_KEY_BASE:-}" == "UpNVntn3cDxHJpq99YMc1T1AQgQpc8kfYTuRgBiYa15BLrx8etQoXz3gZv1/u2oq" ]]; then
+    local current_secret_base=$(get_env_value "SECRET_KEY_BASE")
+    if [[ "$current_secret_base" == "UpNVntn3cDxHJpq99YMc1T1AQgQpc8kfYTuRgBiYa15BLrx8etQoXz3gZv1/u2oq" ]]; then
         local new_secret_base=$(generate_secret)
         sed -i "s|^SECRET_KEY_BASE=.*|SECRET_KEY_BASE=$new_secret_base|" "$ENV_FILE"
         log_info "Generated new SECRET_KEY_BASE"
@@ -144,7 +155,8 @@ main() {
     fi
     
     # Generate DASHBOARD_PASSWORD if insecure
-    if [[ "${DASHBOARD_PASSWORD:-}" == "this_password_is_insecure_and_should_be_updated" ]]; then
+    local current_dash=$(get_env_value "DASHBOARD_PASSWORD")
+    if [[ "$current_dash" == "this_password_is_insecure_and_should_be_updated" ]]; then
         local new_dash=$(generate_password)
         sed -i "s|^DASHBOARD_PASSWORD=.*|DASHBOARD_PASSWORD=$new_dash|" "$ENV_FILE"
         log_info "Generated new DASHBOARD_PASSWORD"
@@ -152,7 +164,8 @@ main() {
     fi
     
     # Generate POOLER_TENANT_ID if placeholder
-    if is_placeholder "${POOLER_TENANT_ID:-}"; then
+    local current_tenant=$(get_env_value "POOLER_TENANT_ID")
+    if is_placeholder "$current_tenant"; then
         local new_tenant="tenant-$(openssl rand -hex 4)"
         sed -i "s|^POOLER_TENANT_ID=.*|POOLER_TENANT_ID=$new_tenant|" "$ENV_FILE"
         log_info "Generated new POOLER_TENANT_ID"
@@ -161,10 +174,10 @@ main() {
     
     # Regenerate JWT tokens if JWT_SECRET was updated
     if $jwt_updated; then
-        source "$ENV_FILE"  # Reload to get new JWT_SECRET
+        local new_jwt_secret=$(get_env_value "JWT_SECRET")
         
-        local new_anon=$(generate_jwt_token "anon" "$JWT_SECRET")
-        local new_service=$(generate_jwt_token "service_role" "$JWT_SECRET")
+        local new_anon=$(generate_jwt_token "anon" "$new_jwt_secret")
+        local new_service=$(generate_jwt_token "service_role" "$new_jwt_secret")
         
         sed -i "s|^ANON_KEY=.*|ANON_KEY=$new_anon|" "$ENV_FILE"
         sed -i "s|^SERVICE_ROLE_KEY=.*|SERVICE_ROLE_KEY=$new_service|" "$ENV_FILE"
@@ -172,14 +185,16 @@ main() {
     fi
     
     # Generate Logflare tokens if placeholders
-    if is_placeholder "${LOGFLARE_PUBLIC_ACCESS_TOKEN:-}"; then
+    local current_lf_pub=$(get_env_value "LOGFLARE_PUBLIC_ACCESS_TOKEN")
+    if is_placeholder "$current_lf_pub"; then
         local new_lf_pub=$(generate_secret)
         sed -i "s|^LOGFLARE_PUBLIC_ACCESS_TOKEN=.*|LOGFLARE_PUBLIC_ACCESS_TOKEN=$new_lf_pub|" "$ENV_FILE"
         log_info "Generated new LOGFLARE_PUBLIC_ACCESS_TOKEN"
         updated=true
     fi
     
-    if is_placeholder "${LOGFLARE_PRIVATE_ACCESS_TOKEN:-}"; then
+    local current_lf_priv=$(get_env_value "LOGFLARE_PRIVATE_ACCESS_TOKEN")
+    if is_placeholder "$current_lf_priv"; then
         local new_lf_priv=$(generate_secret)
         sed -i "s|^LOGFLARE_PRIVATE_ACCESS_TOKEN=.*|LOGFLARE_PRIVATE_ACCESS_TOKEN=$new_lf_priv|" "$ENV_FILE"
         log_info "Generated new LOGFLARE_PRIVATE_ACCESS_TOKEN"

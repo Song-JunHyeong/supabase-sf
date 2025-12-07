@@ -69,8 +69,6 @@ main() {
         log_error ".env file not found"
         exit 1
     fi
-    source "$ENV_FILE"
-    
     # Backup
     cp "$ENV_FILE" "$ENV_FILE.bak.$(date +%Y%m%d%H%M%S)"
     log_info "Backup created: $ENV_FILE.bak.*"
