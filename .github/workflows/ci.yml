@@ -1,0 +1,50 @@
+name: Self-Host CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Initialize instance
+        run: |
+          chmod +x ./scripts/*.sh
+          ./scripts/init-instance.sh
+
+      - name: Wait for services
+        run: |
+          echo "Waiting for services to be healthy..."
+          sleep 60
+
+      - name: Health check
+        run: ./scripts/check-health.sh
+
+      - name: Test API endpoints
+        run: |
+          # Test Kong gateway
+          curl -sf http://localhost:8000 || exit 1
+
+          # Test Auth health
+          curl -sf http://localhost:8000/auth/v1/health || exit 1
+
+          # Test REST API
+          curl -sf http://localhost:8000/rest/v1/ || exit 1
+
+          echo "All API endpoints responding!"
+
+      - name: Show logs on failure
+        if: failure()
+        run: docker compose logs
+
+      - name: Cleanup
+        if: always()
+        run: docker compose down -v --remove-orphans
