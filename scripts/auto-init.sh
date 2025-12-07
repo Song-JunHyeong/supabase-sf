@@ -74,7 +74,10 @@ main() {
     
     # Check if already initialized
     if [[ -f "$INIT_MARKER" ]]; then
-        log_info "Already initialized. Skipping..."
+        log_info "Already initialized."
+        # Still print env info for deploy terminal
+        print_env_info
+        print_mcp_guide
         exit 0
     fi
     

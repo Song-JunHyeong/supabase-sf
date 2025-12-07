@@ -39,11 +39,17 @@ When deploying via Docker Compose on VPS panels, configure domain routing:
 | **Compose Service** | `kong` |
 
 > [!TIP]
-> Environment values including dashboard credentials are displayed in container logs:
+> **View directly in deploy terminal:**
+> - Environment variables (URLs, API keys, dashboard credentials)
+> - MCP connection config (for Claude Desktop / Cursor)
+>
+> Auto-printed at the end of deployment logs. Copy-paste ready!
+>
+> Or check container logs:
 > ```bash
-> docker logs <instance>-env-info
+> docker logs <instance>-env-info   # Environment variables
+> docker logs <instance>-mcp-guide  # MCP config
 > ```
-> Logs update automatically when `.env` file changes.
 
 ---
 
