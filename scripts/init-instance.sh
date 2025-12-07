@@ -217,7 +217,7 @@ main() {
     
     echo ""
     log_info "Supabase is starting!"
-    log_info "Dashboard: http://localhost:8000"
+    log_info "Dashboard: http://localhost"
     log_info "Run './scripts/check-health.sh' to verify all services are healthy."
 }
 

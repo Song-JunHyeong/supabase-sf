@@ -19,8 +19,8 @@ docker compose up -d   # Auto-generates secrets on first run
 
 **Access:**
 
-- **Dashboard**: http://localhost:8000
-- **API**: http://localhost:8000/rest/v1/
+- **Dashboard**: http://localhost
+- **API**: http://localhost/rest/v1/
 - **MCP Connection Guide**: `docker logs supabase-mcp-guide`
 
 **Default credentials** (check `.env` after first run):

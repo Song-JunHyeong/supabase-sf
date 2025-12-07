@@ -23,7 +23,7 @@ fi
 SUPABASE_URL=$(get_env_value "SUPABASE_PUBLIC_URL")
 SERVICE_ROLE_KEY=$(get_env_value "SERVICE_ROLE_KEY")
 ANON_KEY=$(get_env_value "ANON_KEY")
-SUPABASE_URL="${SUPABASE_URL:-http://localhost:8000}"
+SUPABASE_URL="${SUPABASE_URL:-http://localhost}"
 
 printf "\n"
 printf "================================================================================\n"
