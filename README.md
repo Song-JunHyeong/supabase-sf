@@ -6,6 +6,12 @@ Production-ready Docker Compose setup for self-hosting Supabase with automated s
 > **For self-hosted deployments only.**
 > Using [Supabase Cloud](https://supabase.com/dashboard)? See the [official docs](https://supabase.com/docs).
 
+## 💖 Sponsor
+
+[![GitHub Sponsors](https://img.shields.io/badge/sponsor-30363D?style=for-the-badge&logo=github&logoColor=white)](https://github.com/sponsors/JuN-B-official)
+
+> Your sponsorship helps me continuously develop and release more useful and amazing open source projects. Your support powers not only this project but also future projects to come!
+
 # Related projects
 
 - [supabase-mcp-sf](https://github.com/Song-JunHyeong/supabase-mcp-sf)
