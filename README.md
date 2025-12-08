@@ -67,6 +67,31 @@ When deploying via Docker Compose on VPS panels, configure domain routing:
 
 ---
 
+## Secure Deployment (Without VPS Panel)
+
+For bare metal VPS without EasyPanel/Coolify, use the security overlays:
+
+```bash
+# Set your domain in .env
+DOMAIN=supabase.yourdomain.com
+
+# Start with full security stack
+docker compose \
+  -f docker-compose.yml \
+  -f docker-compose.secure.yml \
+  -f docker-compose.caddy.yml \
+  up -d
+```
+
+This enables:
+- ✅ **Automatic SSL** via Caddy (Let's Encrypt)
+- ✅ **Rate limiting** on Auth/API/Dashboard
+- ✅ **Port restrictions** (DB/Analytics localhost only)
+
+See [docs/security.md](./docs/security.md) for firewall setup and customization.
+
+---
+
 ## Features
 
 - **Auto-initialization**: Secrets generated automatically on first deployment
