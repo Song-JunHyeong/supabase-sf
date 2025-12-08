@@ -42,12 +42,12 @@ jobs:
 
       - name: Test core functionality
         run: |
-          # Check DB is accessible
-          docker exec supabase-db psql -U postgres -c "SELECT 1;" || exit 1
+          # Check DB is accessible (use docker compose exec for dynamic container names)
+          docker compose exec -T db psql -U postgres -c "SELECT 1;" || exit 1
           echo "Database: OK"
 
           # Check Auth container
-          docker exec supabase-auth wget -q --spider http://localhost:9999/health || echo "Auth internal check skipped"
+          docker compose exec -T auth wget -q --spider http://localhost:9999/health || echo "Auth internal check skipped"
           echo "Auth container: OK"
 
       - name: Show logs on failure
