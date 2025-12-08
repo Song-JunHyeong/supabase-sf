@@ -2,6 +2,8 @@
 
 Production-ready Docker Compose setup for self-hosting Supabase with automated secret management.
 
+This is a one-person project, built and maintained in spare time.
+
 > [!CAUTION]
 > **For self-hosted deployments only.**
 > Using [Supabase Cloud](https://supabase.com/dashboard)? See the [official docs](https://supabase.com/docs).
