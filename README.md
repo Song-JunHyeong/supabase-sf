@@ -30,8 +30,22 @@ docker compose up -d   # Auto-generates secrets on first run
 **Access:**
 
 - **Dashboard**: http://localhost
-- **API**: http://localhost/rest/v1/
 - **MCP Connection Guide**: `docker logs supabase-mcp-guide`
+
+**API Endpoints** (all auto-configured):
+
+| Endpoint | URL | Description |
+|----------|-----|-------------|
+| REST | `http://<your-domain>:8000/rest/v1/` | PostgREST API |
+| Auth | `http://<your-domain>:8000/auth/v1/` | Authentication (GoTrue) |
+| Storage | `http://<your-domain>:8000/storage/v1/` | File Storage |
+| Realtime | `http://<your-domain>:8000/realtime/v1/` | WebSocket subscriptions |
+| Functions | `http://<your-domain>:8000/functions/v1/` | Edge Functions |
+| GraphQL | `http://<your-domain>:8000/graphql/v1` | GraphQL API |
+| Analytics | `http://<your-domain>:8000/analytics/v1/` | Logflare Analytics |
+
+> [!TIP]
+> Two API keys are auto-generated: `ANON_KEY` (public) and `SERVICE_ROLE_KEY` (admin). Both work across all endpoints.
 
 **Default credentials** (check `.env` after first run):
 
