@@ -44,7 +44,7 @@ check_container() {
     
     # In CI, treat certain services as optional (known initialization timing issues)
     local instance_name="$(get_instance_name)"
-    local ci_optional_services=("${instance_name}-pooler" "${instance_name}-kong" "realtime-dev.supabase-realtime")
+    local ci_optional_services=("${instance_name}-pooler" "${instance_name}-kong" "${instance_name}.supabase-realtime")
     if [[ "${CI:-}" == "true" || "${GITHUB_ACTIONS:-}" == "true" ]]; then
         for svc in "${ci_optional_services[@]}"; do
             if [[ "$name" == "$svc" ]]; then
@@ -181,8 +181,8 @@ main() {
     check_container "${instance}-kong"
     check_container "${instance}-auth"
     check_container "${instance}-rest"
-    # Realtime uses special naming format (see docker-compose.yml comment)
-    check_container "realtime-dev.supabase-realtime"
+    # Realtime uses dynamic naming: {INSTANCE_NAME}.supabase-realtime
+    check_container "${instance}.supabase-realtime"
     check_container "${instance}-storage"
     check_container "${instance}-meta"
     check_container "${instance}-edge-functions"

@@ -92,16 +92,8 @@ main() {
     local updated=false
     local jwt_updated=false
     
-    # Generate unique INSTANCE_NAME if default
-    local instance=$(get_env_value "INSTANCE_NAME")
-    if [[ "$instance" == "supabase" ]] || [[ "$instance" == "supabase-auto-id" ]] || [[ -z "$instance" ]]; then
-        # Generate short unique ID (6 chars)
-        local unique_id=$(openssl rand -hex 3)
-        local new_instance="supabase-${unique_id}"
-        sed -i "s|^INSTANCE_NAME=.*|INSTANCE_NAME=$new_instance|" "$ENV_FILE"
-        log_info "Generated INSTANCE_NAME: $new_instance"
-        updated=true
-    fi
+    # INSTANCE_NAME is now a fixed default ('supabase') in .env.example
+    # Users can manually change it for multi-instance setups
     
     # Generate POSTGRES_PASSWORD
     local pg_pass=$(get_env_value "POSTGRES_PASSWORD")

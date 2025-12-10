@@ -14,31 +14,6 @@ name: ${INSTANCE_NAME:-supabase}
 
 services:
   # ─────────────────────────────────────────────────────────────────────────────
-  # Cleanup Service (removes orphaned containers before deployment)
-  # ─────────────────────────────────────────────────────────────────────────────
-  cleanup:
-    container_name: ${INSTANCE_NAME:-supabase}-cleanup
-    image: docker:24-cli
-    volumes:
-      - ${DOCKER_SOCKET_LOCATION:-/var/run/docker.sock}:/var/run/docker.sock:ro
-    entrypoint: /bin/sh
-    command:
-      - -c
-      - |
-        echo "[CLEANUP] Checking for orphaned containers..."
-
-        # Remove orphaned realtime container (hardcoded name conflicts)
-        if docker ps -a --format '{{.Names}}' | grep -q '^realtime-dev.supabase-realtime$$'; then
-          echo "[CLEANUP] Removing orphaned realtime container..."
-          docker stop realtime-dev.supabase-realtime 2>/dev/null || true
-          docker rm realtime-dev.supabase-realtime 2>/dev/null || true
-          echo "[CLEANUP] Realtime container removed"
-        fi
-
-        echo "[CLEANUP] Cleanup complete"
-    restart: "no"
-
-  # ─────────────────────────────────────────────────────────────────────────────
   # Auto-Init Service (generates secrets on first deployment)
   # ─────────────────────────────────────────────────────────────────────────────
   init:
@@ -47,9 +22,6 @@ services:
     volumes:
       - .:/app:z
     working_dir: /app
-    depends_on:
-      cleanup:
-        condition: service_completed_successfully
     entrypoint: /bin/sh
     command:
       - -c
@@ -185,6 +157,8 @@ services:
       SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY}
       DASHBOARD_USERNAME: ${DASHBOARD_USERNAME}
       DASHBOARD_PASSWORD: ${DASHBOARD_PASSWORD}
+      # For dynamic realtime container name resolution
+      REALTIME_HOST: ${INSTANCE_NAME:-supabase}.supabase-realtime
     # https://unix.stackexchange.com/a/294837
     entrypoint: bash -c 'eval "echo \"$$(cat ~/temp.yml)\"" > ~/kong.yml && /docker-entrypoint.sh kong docker-start'
 
@@ -292,11 +266,9 @@ services:
     command: ["postgrest"]
 
   realtime:
-    # IMPORTANT: This container name is hardcoded because Supabase Realtime
-    # parses the tenant ID from the subdomain. This means only ONE Supabase
-    # instance per server is supported due to this container name conflict.
-    # For multi-instance setups, use separate VPS/VMs.
-    container_name: realtime-dev.supabase-realtime
+    # Container name now uses INSTANCE_NAME for multi-instance support
+    # Format: {tenant_id}.supabase-realtime where tenant_id = INSTANCE_NAME
+    container_name: ${INSTANCE_NAME:-supabase}.supabase-realtime
     image: supabase/realtime:v2.65.3
     restart: unless-stopped
     depends_on:
@@ -316,7 +288,7 @@ services:
           "/dev/null",
           "-H",
           "Authorization: Bearer ${ANON_KEY}",
-          "http://localhost:4000/api/tenants/realtime-dev/health",
+          "http://localhost:4000/api/tenants/${INSTANCE_NAME:-supabase}/health",
         ]
       timeout: 5s
       interval: 5s
