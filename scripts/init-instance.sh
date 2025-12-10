@@ -110,7 +110,7 @@ main() {
     
     # Generate unique INSTANCE_NAME if placeholder
     local current_instance=$(get_env_value "INSTANCE_NAME")
-    if [[ "$current_instance" == "supabase" ]] || [[ "$current_instance" == "supabase-{auto}" ]] || [[ -z "$current_instance" ]]; then
+    if [[ "$current_instance" == "supabase" ]] || [[ "$current_instance" == "supabase-auto-id" ]] || [[ -z "$current_instance" ]]; then
         local unique_id=$(openssl rand -hex 3)
         local new_instance="supabase-${unique_id}"
         sed -i "s|^INSTANCE_NAME=.*|INSTANCE_NAME=$new_instance|" "$ENV_FILE"

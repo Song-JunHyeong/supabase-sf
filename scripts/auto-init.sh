@@ -94,7 +94,7 @@ main() {
     
     # Generate unique INSTANCE_NAME if default
     local instance=$(get_env_value "INSTANCE_NAME")
-    if [[ "$instance" == "supabase" ]] || [[ "$instance" == "supabase-{auto}" ]] || [[ -z "$instance" ]]; then
+    if [[ "$instance" == "supabase" ]] || [[ "$instance" == "supabase-auto-id" ]] || [[ -z "$instance" ]]; then
         # Generate short unique ID (6 chars)
         local unique_id=$(openssl rand -hex 3)
         local new_instance="supabase-${unique_id}"
