@@ -14,6 +14,31 @@ name: ${INSTANCE_NAME:-supabase}
 
 services:
   # ─────────────────────────────────────────────────────────────────────────────
+  # Cleanup Service (removes orphaned containers before deployment)
+  # ─────────────────────────────────────────────────────────────────────────────
+  cleanup:
+    container_name: ${INSTANCE_NAME:-supabase}-cleanup
+    image: docker:24-cli
+    volumes:
+      - ${DOCKER_SOCKET_LOCATION:-/var/run/docker.sock}:/var/run/docker.sock:ro
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        echo "[CLEANUP] Checking for orphaned containers..."
+
+        # Remove orphaned realtime container (hardcoded name conflicts)
+        if docker ps -a --format '{{.Names}}' | grep -q '^realtime-dev.supabase-realtime$$'; then
+          echo "[CLEANUP] Removing orphaned realtime container..."
+          docker stop realtime-dev.supabase-realtime 2>/dev/null || true
+          docker rm realtime-dev.supabase-realtime 2>/dev/null || true
+          echo "[CLEANUP] Realtime container removed"
+        fi
+
+        echo "[CLEANUP] Cleanup complete"
+    restart: "no"
+
+  # ─────────────────────────────────────────────────────────────────────────────
   # Auto-Init Service (generates secrets on first deployment)
   # ─────────────────────────────────────────────────────────────────────────────
   init:
@@ -22,6 +47,9 @@ services:
     volumes:
       - .:/app:z
     working_dir: /app
+    depends_on:
+      cleanup:
+        condition: service_completed_successfully
     entrypoint: /bin/sh
     command:
       - -c
